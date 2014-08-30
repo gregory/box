@@ -16,32 +16,23 @@ run apt-get update -y &&\
       libcurl4-openssl-dev \
       imagemagick
 
-run useradd dev &&\
-    mkdir /home/dev &&\
-    chown -R dev: /home/dev
 run mkdir /var/shared/ &&\
-    touch /var/shared/.gitkeep &&\
-    chown -R dev:dev /var/shared
-run mkdir /var/lib/gems &&\
-    touch /var/lib/gems/.gitkeep &&\
-    chown -R dev:dev /var/lib/gems &&\
-    chown -R dev:dev /usr/local/bin
-volume /var/shared
-workdir /var/shared
+    touch /var/shared/.gitkeep
 
+env HOME /home/dev
+env PATH /home/dev/.gem/ruby/1.9.1/bin:$HOME/.rbenv/bin:$PATH
+
+run git clone https://github.com/sstephenson/rbenv.git /home/dev/.rbenv &&\
+    git clone https://github.com/sstephenson/ruby-build.git /home/dev/.rbenv/plugins/ruby-build
 
 add gitconfig /home/dev/.gitconfig
 add gemrc /home/dev/.gemrc
 add bash_profile /home/dev/.bash_profile
 add bundlerc /home/dev/.bundlerc
 
-env HOME /home/dev
-env PATH /home/dev/.gem/ruby/1.9.1/bin:$PATH
-
-
+workdir /var/shared
+volume /var/shared
 run ln -s /var/shared/.ssh &&\
     ln -s /var/shared/.bash_history &&\
-    ln -s /var/shared/.maintainercfg &&\
-    chown -R dev: /home/dev
+    ln -s /var/shared/.maintainercfg
 
-user dev
