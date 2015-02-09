@@ -1,38 +1,31 @@
-FROM debian:wheezy
+FROM gliderlabs/alpine:3.1
 
-run apt-get update -y &&\
-    apt-get install -y -qq \
-      git \ 
-      build-essential \
-      curl \
-      vim \
-      tmux \
-      strace \
-      diffstat \
-      tcpdump \
-      ruby1.9.3 \ 
-      libxml2 \
-      libxslt-dev \
-      libcurl4-openssl-dev \
-      imagemagick
+run apk-install \
+    ruby-io-console\
+    ruby-rake\
+    ca-certificates\
+    curl\
+    git\
+    tmux\
+    vim\
+    bash\
+    vimdiff
 
-run mkdir /var/shared/ &&\
-    touch /var/shared/.gitkeep
+ENV SELECTA_VERSION 0.0.6
+RUN curl -L https://github.com/garybernhardt/selecta/archive/v${SELECTA_VERSION}.tar.gz | tar zx &&\
+    mv selecta-${SELECTA_VERSION}/selecta /usr/local/bin &&\
+    rm -rf selecta-${SELECTA_VERSION}
 
-env HOME /home/dev
-env PATH /home/dev/.gem/ruby/1.9.1/bin:$HOME/.rbenv/bin:$PATH
+RUN git clone https://github.com/gregory/dotfiles ~/dotfiles &&\
+    cd ~/dotfiles &&\
+    rake install &&\
+    apk del ruby-rake
 
-run git clone https://github.com/sstephenson/rbenv.git /home/dev/.rbenv &&\
-    git clone https://github.com/sstephenson/ruby-build.git /home/dev/.rbenv/plugins/ruby-build
+RUN curl -o ~/.git-prompt.sh \
+    https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
 
-add gitconfig /home/dev/.gitconfig
-add gemrc /home/dev/.gemrc
-add bash_profile /home/dev/.bash_profile
-add bundlerc /home/dev/.bundlerc
-
-workdir /var/shared
-volume /var/shared
-run ln -s /var/shared/.ssh &&\
-    ln -s /var/shared/.bash_history &&\
-    ln -s /var/shared/.maintainercfg
+ENV SHELL /bin/bash
+ENV WORK_PATHS /code
+WORKDIR /code
+CMD bash
 
